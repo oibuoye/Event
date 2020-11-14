@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.6" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Logs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Event.Core\Event.Core.csproj" />
+  </ItemGroup>
+
+
+</Project>

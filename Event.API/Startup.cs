@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using Event.API.Controllers.Handlers;
+using Event.API.Controllers.Handlers.Contracts;
 using Event.Core.Configuration;
+using Event.Core.Logger;
+using Event.Core.Logger.Contracts;
 using Event.Core.Services;
 using Event.Core.Services.Contracts;
 using Event.Core.SessionManagement;
@@ -11,14 +11,10 @@ using Event.Core.SessionManagement.Contracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -41,10 +37,15 @@ namespace Event.API
             services.AddOptions();
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
             services.TryAddSingleton<IJwtSettings>(x => x.GetRequiredService<IOptions<JwtSettings>>().Value);
+            services.Configure<CosmosDBSettings>(Configuration.GetSection("CosmosDBSettings"));
+            services.TryAddSingleton<ICosmosDBSettings>(x => x.GetRequiredService<IOptions<CosmosDBSettings>>().Value);
 
             services.AddScoped<IConferenceEventService, ConferenceEventService>();
             services.AddScoped<IConferenceSessionService, ConferenceSessionService>();
+            services.AddScoped<IConferenceEventHandler, ConferenceEventHandler>();
+            services.AddScoped<IConferenceSessionHandler, ConferenceSessionHandler>();
             services.AddScoped<ISessionManager, SessionManager>();
+            services.AddScoped<IFileLogger, FileLogger>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

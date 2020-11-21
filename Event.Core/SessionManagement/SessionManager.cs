@@ -9,6 +9,8 @@ namespace Event.Core.SessionManagement
     public class SessionManager : ISessionManager
     {
         public static CosmosClient Client { get; set; }
+        public static DatabaseResponse database { get; set; }
+
         private readonly ICosmosDBSettings _cosmosDBSettings;
 
         public SessionManager(ICosmosDBSettings cosmosDBSettings)
@@ -27,14 +29,15 @@ namespace Event.Core.SessionManagement
                 try
                 {
                     Client = new CosmosClient(_cosmosDBSettings.Endpoint, _cosmosDBSettings.MasterKey);
-                    return new CosmosClientObject { Client = Client, DBName = _cosmosDBSettings.DBName };
+                    database = Client.CreateDatabaseIfNotExistsAsync(_cosmosDBSettings.DBName).Result;
+                    return new CosmosClientObject { Client = Client, DBName = _cosmosDBSettings.DBName, Database = database};
                 }
                 catch (Exception ex)
                 {
                     throw ex;
                 }
             }
-            return new CosmosClientObject { Client = Client, DBName = _cosmosDBSettings.DBName };
+            return new CosmosClientObject { Client = Client, DBName = _cosmosDBSettings.DBName, Database = database };
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Event.Core.HelperModels
     {
         public CosmosClient Client { get; set; }
 
+        public DatabaseResponse Database { get; set; }
+
         public string DBName { get; set; }
     }
 }

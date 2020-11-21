@@ -1,30 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
-using Event.Core.Enums;
+using System.Text;
 
-namespace Event.Core.Entities
+namespace Event.Core.HelperModels
 {
-    [Table("ConferenceSession")]
-    public class ConferenceSession
+    public class SessionCreateVM
     {
-        public string Id { get; set; }
-
-        [MaxLength(200)]
+        [Required]
         public string Name { get; set; }
 
-        [MaxLength(50)]
+        [Required]
         public string Presenter { get; set; }
 
+        [Required]
         public int Duration { get; set; }
 
-        [MaxLength(100)]
+        [Required]
         public string Level { get; set; }
 
-        [MaxLength(300)]
+        [Required]
         public string Abstract { get; set; }
 
         public List<string> Voters { get; set; }

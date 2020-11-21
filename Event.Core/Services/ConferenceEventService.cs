@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Event.Core.Logger.Contracts;
 using Event.Core.Entities;
+using Event.Core.HelperModels;
 
 namespace Event.Core.Services
 {
@@ -14,40 +15,43 @@ namespace Event.Core.Services
     {
         private static ISessionManager _cosmosSession;
         private static IFileLogger _log;
+        private static ContainerResponse _containerResponse;
 
         public ConferenceEventService(IFileLogger log, ISessionManager cosmosSession)
         {
             _cosmosSession = cosmosSession;
+            GetContainer();
             _log = log;
         }
 
         public async Task<bool> AddEvent(ConferenceEvent model)
         {
-            var clientObject = _cosmosSession.GetSession();
-            var container = clientObject.Client.GetContainer(clientObject.DBName, typeof(ConferenceEvent).Name);
-            var response = await container.CreateItemAsync(model, new PartitionKey(model.Id));
-            _log.Info($"Added new location: {response.RequestCharge} RUs");
-            return true;
+            try
+            {
+                var response = await _containerResponse.Container.CreateItemAsync(model);
+                _log.Info($"Added new location: {response.RequestCharge} RUs");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
-        public async Task<IEnumerable<ConferenceEvent>> GetEvents()
+        public async Task<IEnumerable<ConferenceEventVM>> GetEvents()
         {
-            var clientObject = _cosmosSession.GetSession();
-            var container = clientObject.Client.GetContainer(clientObject.DBName, typeof(ConferenceEvent).Name);
             var sql = "SELECT * FROM c";
-            var iterator = container.GetItemQueryIterator<ConferenceEvent>(sql);
+            var iterator = _containerResponse.Container.GetItemQueryIterator<ConferenceEventVM>(sql);
             var page = await iterator.ReadNextAsync();
 
             return page.Resource;
         }
 
-        public async Task<bool> UpdateEvent(ConferenceEvent model)
+        public async Task<bool> UpdateEvent(ConferenceEventVM model)
         {
             try
             {
-                var clientObject = _cosmosSession.GetSession();
-                var container = clientObject.Client.GetContainer(clientObject.DBName, typeof(ConferenceEvent).Name);
-                var response = await container.ReplaceItemAsync<dynamic>(model, model.Id.ToString(), partitionKey: new PartitionKey(model.Id));
+                var response = await _containerResponse.Container.ReplaceItemAsync<dynamic>(model, model.Id.ToString());
 
                 return true;
             }
@@ -55,6 +59,12 @@ namespace Event.Core.Services
             {
                 return false;
             }
+        }
+
+        private void GetContainer()
+        {
+            CosmosClientObject _sessionObject = _cosmosSession.GetSession();
+            _containerResponse = _sessionObject.Database.Database.CreateContainerIfNotExistsAsync(typeof(ConferenceEvent).Name, "/time", 400).Result;
         }
     }
 

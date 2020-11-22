@@ -70,5 +70,47 @@ namespace Event.API.Controllers
             };
         }
 
+
+        [HttpPost]
+        [Route("approverequesttwo")]
+        public HttpResponseMessage ApproveRequestTwo([FromBody] UssdResponse ussdResponse)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage();
+            string response;
+
+            if (ussdResponse.text == null)
+            {
+                ussdResponse.text = "";
+            }
+
+            if (ussdResponse.text.Equals("", StringComparison.Ordinal))
+            {
+                response = "CON USSD Demo in Action\n";
+                response += "1. Do something\n";
+                response += "2. Do some other thing\n";
+                response += "3. Get my Number\n";
+            }
+            else if (ussdResponse.text.Equals("1", StringComparison.Ordinal))
+            {
+                response = "END I am doing something \n";
+            }
+            else if (ussdResponse.text.Equals("2", StringComparison.Ordinal))
+            {
+                response = "END Some other thing has been done \n";
+            }
+            else if (ussdResponse.text.Equals("3", StringComparison.Ordinal))
+            {
+                response = $"END Here is your phone number : {ussdResponse.phoneNumber} \n";
+            }
+            else
+            {
+                response = "END Invalid option \n";
+            }
+
+            responseMessage.Content = new StringContent(response, Encoding.UTF8, "text/plain");
+
+            return responseMessage;
+        }
+
     }
 }
